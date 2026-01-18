@@ -1,0 +1,61 @@
+﻿{
+  "tdxpy_formulas": {
+    "version": "0.1.0",
+    "description": "通达信Python公式插件配置文件",
+    "last_modified": "2026-01-05",
+    "author": "码上工坊",
+    "license": "MIT"
+  },
+  "python_config": {
+    "python_home": "C:/new_tdx/T0002/dlls/third_party/Python3142-64/",
+    "python_executable": "C:/new_tdx/T0002/dlls/third_party/Python3142-64/python.exe",
+    "python_venv_home": "C:/new_tdx/T0002/dlls/pythonenv/",
+    "python_formulas_home": "C:/new_tdx/T0002/dlls/py64env/tdxpy_formulas/",
+    "search_paths": [
+      "C:/new_tdx/T0002/dlls/third_party/Python3142-64",
+      "C:/new_tdx/T0002/dlls/third_party/Python3142-64/Lib",
+      "C:/new_tdx/T0002/dlls/third_party/Python3142-64/Dlls",
+      "C:/new_tdx/T0002/dlls/py64env/Lib",
+      "C:/new_tdx/T0002/dlls/py64env/Lib/site-packages",
+      "C:/new_tdx/T0002/dlls/py64env/tdxpy_formulas",
+      "C:/new_tdx/T0002/dlls",
+      "./"
+    ],
+    "enable_debug": false
+  },
+  "logging_config": {
+    "log_file": "C:/new_tdx/T0002/dlls/logs/tdxpy_formula.log",
+    "log_level": "DEBUG"
+  },
+  "formula_mappings": [
+    {
+      "name": "TDXPY_MA",
+      "description": "使用Python移动平均线(MA)计算",
+      "path": "",
+      "module_name": "tdxpy_ma",
+      "function": "tdxpy_ma",
+      "id": 1,
+      "user_params": "5,10,20,60"
+    },
+    {
+      "name": "TDXPY_MA_NUMPY",
+      "description": "使用NumPy库对移动平均线计算进行向量化加速",
+      "path": "",
+      "module_name": "tdxpy_ma_numpy",
+      "function": "calculate_with_numpy",
+      "id": 2,
+      "user_params": "12,26,9"
+    }
+  ],
+  "metadata": {
+    "config_version": "0.1.0",
+    "compatibility": {
+      "tdx_version": ">=7.0",
+      "python_version": "3.14.2",
+      "architecture": "64bit"
+    },
+    "created": "2026-01-05",
+    "updated": "2026-01-05",
+    "user_params_format": "逗号分隔的字符串，如'5,10,20'表示多个周期参数"
+  }
+}

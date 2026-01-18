@@ -1,0 +1,689 @@
+﻿# CMakeLists.txt - tdxpy_formulas 项目构建配置
+# 通达信Python公式插件 - 支持调用Python脚本
+# 版权所有 (c) 2026 码上工坊. 保留所有权利。
+
+cmake_minimum_required(VERSION 3.15)
+project(tdxpy_formulas VERSION 0.1.0 LANGUAGES CXX)
+
+# ============================================================================
+# 项目全局配置
+# ============================================================================
+
+# 设置默认构建类型
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "构建类型 (Debug/Release)" FORCE)
+endif()
+
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# 设置输出目录
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# ============================================================================
+# 架构选择配置
+# ============================================================================
+
+# 允许用户选择架构（默认为32位以兼容通达信）
+set(TDXPY_TARGET_ARCHITECTURE "Win32" CACHE STRING "目标架构 (Win32/x64)")
+set_property(CACHE TDXPY_TARGET_ARCHITECTURE PROPERTY STRINGS "Win32" "x64")
+
+# 如果通过 -A 选项设置了平台，自动调整架构
+if(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+    # 如果 CMake 指定了 x64 平台，强制使用 x64 架构
+    set(TDXPY_TARGET_ARCHITECTURE "x64" CACHE STRING "目标架构 (Win32/x64)" FORCE)
+endif()
+
+if(TDXPY_TARGET_ARCHITECTURE STREQUAL "Win32")
+    # 32位构建
+    set(CMAKE_GENERATOR_PLATFORM "Win32")
+    set(TDXPY_TARGET_ARCH "x86")
+    message(STATUS "目标架构: 32位 (Win32)")
+elseif(TDXPY_TARGET_ARCHITECTURE STREQUAL "x64")
+    # 64位构建
+    set(CMAKE_GENERATOR_PLATFORM "x64")
+    set(TDXPY_TARGET_ARCH "x64")
+    message(STATUS "目标架构: 64位 (x64)")
+endif()
+
+# ============================================================================
+# Windows特定配置
+# ============================================================================
+
+if(WIN32)
+    # Windows版本定义
+    add_definitions(-DWIN32 -D_WINDOWS -D_UNICODE -DUNICODE)
+    
+    # DLL导出控制
+    if(MSVC)
+        # 设置编译选项
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ob2 /D NDEBUG")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Zi /Ob0 /Od /RTC1")
+        
+        # DLL导出宏
+        add_definitions(-DTDXPY_FORMULAS_EXPORTS)
+        
+        # 警告级别
+        if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+            string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+        endif()
+        
+        # SDL检查
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /sdl")
+        
+        # 一致性模式
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+    endif()
+endif()
+
+# ============================================================================
+# Python配置 - 根据架构选择对应版本的Python
+# ============================================================================
+
+# 允许用户自定义Python路径
+set(PYTHON_ROOT_32 "${CMAKE_SOURCE_DIR}/third_party/Python3142-32" CACHE PATH "32位Python路径")
+set(PYTHON_ROOT_64 "${CMAKE_SOURCE_DIR}/third_party/Python3142-64" CACHE PATH "64位Python路径")
+
+# 根据架构选择Python路径
+if(TDXPY_TARGET_ARCHITECTURE STREQUAL "Win32")
+    # 32位构建：使用32位Python
+    set(PYTHON_ROOT "${PYTHON_ROOT_32}")
+    message(STATUS "Python版本: 3.14.2 (32位)")
+elseif(TDXPY_TARGET_ARCHITECTURE STREQUAL "x64")
+    # 64位构建：使用64位Python
+    set(PYTHON_ROOT "${PYTHON_ROOT_64}")
+    message(STATUS "Python版本: 3.14.2 (64位)")
+else()
+    message(FATAL_ERROR "未知的目标架构: ${TDXPY_TARGET_ARCHITECTURE}")
+endif()
+
+set(PYTHON_INCLUDE_DIR "${PYTHON_ROOT}/include")
+
+# 根据构建类型选择Python库和DLL
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Debug版本使用python314_d.lib 和 python314_d.dll
+    set(PYTHON_LIBRARY_NAME "python314_d.lib")
+    set(PYTHON_DLL_NAME "python314_d.dll")
+else()
+    # Release版本使用python314.lib 和 python314.dll
+    set(PYTHON_LIBRARY_NAME "python314.lib")
+    set(PYTHON_DLL_NAME "python314.dll")
+endif()
+
+set(PYTHON_LIBRARY "${PYTHON_ROOT}/libs/${PYTHON_LIBRARY_NAME}")
+set(PYTHON_DLL_PATH "${PYTHON_ROOT}/${PYTHON_DLL_NAME}")
+
+# 检查Python依赖
+if(NOT EXISTS "${PYTHON_ROOT}")
+    message(FATAL_ERROR "Python安装目录不存在: ${PYTHON_ROOT}
+请确保Python 3.14.2 ${TDXPY_TARGET_ARCH}位已安装到指定目录")
+endif()
+
+if(NOT EXISTS "${PYTHON_INCLUDE_DIR}/Python.h")
+    message(FATAL_ERROR "Python头文件未找到: ${PYTHON_INCLUDE_DIR}/Python.h
+请检查Python安装是否完整")
+endif()
+
+if(NOT EXISTS "${PYTHON_LIBRARY}")
+    message(FATAL_ERROR "Python库文件未找到: ${PYTHON_LIBRARY}")
+endif()
+
+if(NOT EXISTS "${PYTHON_DLL_PATH}")
+    message(FATAL_ERROR "Python DLL未找到: ${PYTHON_DLL_PATH}")
+endif()
+
+message(STATUS "Python路径: ${PYTHON_ROOT}")
+message(STATUS "Python包含目录: ${PYTHON_INCLUDE_DIR}")
+message(STATUS "Python库: ${PYTHON_LIBRARY}")
+message(STATUS "Python DLL: ${PYTHON_DLL_PATH}")
+
+# ============================================================================
+# JSON库配置
+# ============================================================================
+
+set(JSON_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include/json")
+set(JSON_LIBS_BASE_DIR "${CMAKE_SOURCE_DIR}/Libs/json")
+
+# 检查JSON包含目录
+if(NOT EXISTS "${JSON_INCLUDE_DIR}")
+    message(FATAL_ERROR "JSON库头文件目录不存在: ${JSON_INCLUDE_DIR}")
+endif()
+
+# 根据目标架构选择JSON库目录
+if(TDXPY_TARGET_ARCHITECTURE STREQUAL "Win32")
+    # 32位构建：使用win32目录
+    set(JSON_ARCH_DIR "${JSON_LIBS_BASE_DIR}/win32")
+elseif(TDXPY_TARGET_ARCHITECTURE STREQUAL "x64")
+    # 64位构建：使用x64目录
+    set(JSON_ARCH_DIR "${JSON_LIBS_BASE_DIR}/x64")
+else()
+    message(FATAL_ERROR "未知的目标架构: ${TDXPY_TARGET_ARCHITECTURE}")
+endif()
+
+# 根据构建类型选择Debug或Release版本
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(JSON_LIB_DIR "${JSON_ARCH_DIR}/Debug")
+    set(JSON_LIBRARY_NAME "jsoncpp.lib")
+    set(JSON_DLL_NAME "jsoncpp.dll")
+else()
+    set(JSON_LIB_DIR "${JSON_ARCH_DIR}/Release")
+    set(JSON_LIBRARY_NAME "jsoncpp.lib")
+    set(JSON_DLL_NAME "jsoncpp.dll")
+endif()
+
+# 检查JSON库目录是否存在
+if(NOT EXISTS "${JSON_LIB_DIR}")
+    message(FATAL_ERROR "JSON库目录不存在: ${JSON_LIB_DIR}
+请确保${TDXPY_TARGET_ARCHITECTURE} ${CMAKE_BUILD_TYPE}版本的JSON库已放置在正确位置:
+  期望路径: ${JSON_LIB_DIR}
+  基础路径: ${JSON_LIBS_BASE_DIR}
+  项目结构应为:
+    Libs/json/
+      ├── win32/    (32位)
+      │   ├── Debug/
+      │   │   ├── jsoncpp.lib
+      │   │   └── jsoncpp.dll
+      │   └── Release/
+      │       ├── jsoncpp.lib
+      │       └── jsoncpp.dll
+      └── x64/      (64位)
+          ├── Debug/
+          │   ├── jsoncpp.lib
+          │   └── jsoncpp.dll
+          └── Release/
+              ├── jsoncpp.lib
+              └── jsoncpp.dll")
+endif()
+
+# 查找JSON库文件
+find_file(JSON_LIBRARY
+    NAMES ${JSON_LIBRARY_NAME}
+    PATHS ${JSON_LIB_DIR}
+    NO_DEFAULT_PATH
+    REQUIRED
+)
+
+find_file(JSON_DLL_PATH
+    NAMES ${JSON_DLL_NAME}
+    PATHS ${JSON_LIB_DIR}
+    NO_DEFAULT_PATH
+    REQUIRED
+)
+
+if(NOT JSON_LIBRARY)
+    message(FATAL_ERROR "JSON库未找到: ${JSON_LIB_DIR}/${JSON_LIBRARY_NAME}")
+endif()
+
+if(NOT JSON_DLL_PATH)
+    message(FATAL_ERROR "JSON DLL未找到: ${JSON_LIB_DIR}/${JSON_DLL_NAME}")
+endif()
+
+message(STATUS "JSON包含目录: ${JSON_INCLUDE_DIR}")
+message(STATUS "JSON架构目录: ${JSON_ARCH_DIR}")
+message(STATUS "JSON库目录: ${JSON_LIB_DIR}")
+message(STATUS "JSON库: ${JSON_LIBRARY}")
+message(STATUS "JSON DLL: ${JSON_DLL_PATH}")
+
+# ============================================================================
+# 源文件定义
+# ============================================================================
+
+# 项目主源文件
+set(TDXPY_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/dll_main.cpp
+    ${CMAKE_SOURCE_DIR}/src/pch.cpp
+    ${CMAKE_SOURCE_DIR}/src/tdxpy_python_engine.cpp
+    ${CMAKE_SOURCE_DIR}/src/tdxpy_plugin_registry.cpp
+    ${CMAKE_SOURCE_DIR}/src/tdxpy_config_manager.cpp
+    ${CMAKE_SOURCE_DIR}/src/tdxpy_logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/tdxpy_env_var.cpp
+)
+
+# 项目头文件目录
+set(TDXPY_INCLUDE_DIRS
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
+    ${PYTHON_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
+)
+
+# ============================================================================
+# 测试配置
+# ============================================================================
+
+option(BUILD_TESTING "构建测试" OFF)
+
+if(BUILD_TESTING)
+    # 设置测试源文件目录
+    set(TEST_SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/cpp_tests")
+    
+    # 检查测试源文件目录是否存在
+    if(NOT EXISTS "${TEST_SOURCE_DIR}")
+        message(WARNING "测试源文件目录不存在: ${TEST_SOURCE_DIR}")
+        set(TEST_SOURCES "")
+    else()
+        # 添加测试源文件
+        file(GLOB TEST_SOURCES 
+            "${TEST_SOURCE_DIR}/*.cpp"
+        )
+        
+        # 获取测试源文件数量
+        list(LENGTH TEST_SOURCES TEST_SOURCES_COUNT)
+        
+        # 检查是否有测试源文件
+        if(TEST_SOURCES_COUNT EQUAL 0)
+            message(WARNING "在目录 ${TEST_SOURCE_DIR} 中未找到测试源文件")
+        else()
+            # 创建测试目标
+            add_executable(tdxpy_formulas_tests ${TEST_SOURCES})
+            
+            # 设置测试目标属性
+            set_target_properties(tdxpy_formulas_tests PROPERTIES
+                OUTPUT_NAME "tdxpy_formulas_tests"
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
+            )
+            
+            # 设置包含目录
+            target_include_directories(tdxpy_formulas_tests PRIVATE 
+                ${TDXPY_INCLUDE_DIRS}
+                ${TEST_SOURCE_DIR}
+                gtest gtest_main  # 链接 gtest_main（如果使用 Google Test 的主程序）
+            )
+            
+            target_sources(tdxpy_formulas_tests PRIVATE ${TDXPY_SOURCES})
+
+            # 链接库
+            target_link_libraries(tdxpy_formulas_tests
+                    ${PYTHON_LIBRARY}  # Python库
+                    ${JSON_LIBRARY}    # JSON库
+                )
+            
+            # Windows特定链接
+            if(WIN32)
+                target_link_options(tdxpy_formulas_tests PRIVATE
+                    /NODEFAULTLIB:library
+                )
+                
+                # 在Windows上链接ODBC库
+                target_link_libraries(tdxpy_formulas_tests
+                    odbc32
+                    odbccp32
+                )
+                
+                # 链接gtest库（需要确保gtest库已安装）
+                # 如果使用Google Test作为源码，需要包含gtest_main
+                find_package(GTest QUIET)
+                if(GTest_FOUND)
+                    target_link_libraries(tdxpy_formulas_tests GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+                else()
+                    # 如果未找到预安装的gtest，尝试添加本地gtest
+                    if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/googletest")
+                        add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/googletest)
+                        target_link_libraries(tdxpy_formulas_tests gtest gtest_main gmock gmock_main)
+                    else()
+                        message(WARNING "未找到Google Test库，测试将无法链接")
+                    endif()
+                endif()
+            endif()
+            
+            # 启用测试
+            enable_testing()
+            
+            # 添加测试
+            add_test(NAME tdxpy_formulas_tests
+                COMMAND tdxpy_formulas_tests
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+            )
+            
+            message(STATUS "测试目标已添加: tdxpy_formulas_tests")
+            message(STATUS "测试源文件目录: ${TEST_SOURCE_DIR}")
+            message(STATUS "找到的测试源文件数量: ${TEST_SOURCES_COUNT}")
+        endif()
+    endif()
+endif()
+
+# ============================================================================
+# 构建目标
+# ============================================================================
+
+# 创建DLL目标
+add_library(tdxpy_formulas SHARED ${TDXPY_SOURCES})
+
+# 设置目标属性
+set_target_properties(tdxpy_formulas PROPERTIES
+    OUTPUT_NAME "tdxpy_formulas"
+    VERSION ${PROJECT_VERSION}
+    SOVERSION 1
+)
+
+# 设置Windows DLL属性
+if(WIN32)
+    # 资源文件
+    if(EXISTS "${CMAKE_SOURCE_DIR}/resources/version.rc")
+        target_sources(tdxpy_formulas PRIVATE "${CMAKE_SOURCE_DIR}/resources/version.rc")
+    endif()
+    
+    # 导出定义文件
+    if(EXISTS "${CMAKE_SOURCE_DIR}/resources/exports.def")
+        target_sources(tdxpy_formulas PRIVATE "${CMAKE_SOURCE_DIR}/resources/exports.def")
+    endif()
+endif()
+
+# 设置包含目录
+target_include_directories(tdxpy_formulas PRIVATE ${TDXPY_INCLUDE_DIRS})
+
+# 链接库
+target_link_libraries(tdxpy_formulas
+    ${PYTHON_LIBRARY}
+    ${JSON_LIBRARY}
+)
+
+# Windows特定链接
+if(WIN32)
+    target_link_options(tdxpy_formulas PRIVATE
+        /NODEFAULTLIB:library
+    )
+    
+    # 在Windows上链接ODBC库
+    target_link_libraries(tdxpy_formulas
+        odbc32
+        odbccp32
+    )
+endif()
+
+# ============================================================================
+# 构建后处理 - 复制DLL到输出目录
+# ============================================================================
+
+if(WIN32)
+    # 复制Python DLL到输出目录
+    add_custom_command(TARGET tdxpy_formulas POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${PYTHON_DLL_PATH}"
+            "$<TARGET_FILE_DIR:tdxpy_formulas>/"
+        COMMENT "复制Python DLL到输出目录"
+    )
+    
+    # 复制JSON DLL到输出目录
+    add_custom_command(TARGET tdxpy_formulas POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${JSON_DLL_PATH}"
+            "$<TARGET_FILE_DIR:tdxpy_formulas>/"
+        COMMENT "复制JSON DLL到输出目录"
+    )
+endif()
+
+# ============================================================================
+# CMake安装配置 - 使用 cmake --install . 命令
+# ============================================================================
+
+# 设置安装前缀，按架构和构建类型分开
+set(INSTALL_BASE_DIR "${CMAKE_SOURCE_DIR}/dlls")
+set(INSTALL_SUBDIR "${TDXPY_TARGET_ARCHITECTURE}/${CMAKE_BUILD_TYPE}")
+set(CMAKE_INSTALL_PREFIX "${INSTALL_BASE_DIR}/${INSTALL_SUBDIR}" CACHE PATH "安装前缀" FORCE)
+
+message(STATUS "安装基础目录: ${INSTALL_BASE_DIR}")
+message(STATUS "安装子目录: ${INSTALL_SUBDIR}")
+message(STATUS "完整安装路径: ${CMAKE_INSTALL_PREFIX}")
+
+# 根据架构确定Python安装目录名
+if(TDXPY_TARGET_ARCHITECTURE STREQUAL "Win32")
+    set(PYTHON_INSTALL_DIR "third_party/Python3142-32")
+else()
+    set(PYTHON_INSTALL_DIR "third_party/Python3142-64")
+endif()
+
+# 安装DLL目标
+install(TARGETS tdxpy_formulas
+    RUNTIME DESTINATION .  
+    LIBRARY DESTINATION .  
+    ARCHIVE DESTINATION .  
+)
+
+# 安装Python DLL
+install(FILES
+    "${PYTHON_DLL_PATH}"
+    DESTINATION .  
+)
+
+# 安装JSON DLL
+install(FILES
+    "${JSON_DLL_PATH}"
+    DESTINATION . 
+)
+
+# 安装整个Python安装目录
+install(DIRECTORY "${PYTHON_ROOT}/"
+    DESTINATION "${PYTHON_INSTALL_DIR}"
+)
+
+# 安装Python虚拟环境
+if(EXISTS "${CMAKE_SOURCE_DIR}/pythonenv")
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/pythonenv/"
+        DESTINATION "pythonenv"
+    )
+endif()
+
+# 安装配置文件
+if(EXISTS "${CMAKE_SOURCE_DIR}/config/tdxpy_config.json")
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/config/tdxpy_config.json"
+        DESTINATION "config"
+    )
+endif()
+
+# ============================================================================
+# 部署目标
+# ============================================================================
+
+# 根据架构确定Python部署目录名
+if(TDXPY_TARGET_ARCHITECTURE STREQUAL "Win32")
+    set(PYTHON_DEPLOY_DIR "third_party/Python3142-32")
+else()
+    set(PYTHON_DEPLOY_DIR "third_party/Python3142-64")
+endif()
+
+# 创建部署目标
+add_custom_target(deploy
+    # 创建部署目录
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}"
+    
+    # 复制主DLL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:tdxpy_formulas>"
+        "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/"
+    
+    # 复制Python DLL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PYTHON_DLL_PATH}"
+        "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/"
+    
+    # 复制JSON DLL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${JSON_DLL_PATH}"
+        "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/"
+    
+    # 复制Python安装目录
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PYTHON_ROOT}"
+        "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/${PYTHON_DEPLOY_DIR}"
+    
+    DEPENDS tdxpy_formulas
+    COMMENT "创建部署包"
+)
+
+# 复制虚拟环境
+if(EXISTS "${CMAKE_SOURCE_DIR}/pythonenv")
+    add_custom_command(TARGET deploy POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/pythonenv"
+            "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/pythonenv"
+        VERBATIM
+    )
+endif()
+
+# 复制配置文件
+if(EXISTS "${CMAKE_SOURCE_DIR}/config/tdxpy_config.json")
+    add_custom_command(TARGET deploy POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/config"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/config/tdxpy_config.json"
+            "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/config/"
+        VERBATIM
+    )
+endif()
+
+# 复制README
+if(EXISTS "${CMAKE_SOURCE_DIR}/README.md")
+    add_custom_command(TARGET deploy POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/README.md"
+            "${CMAKE_SOURCE_DIR}/deploy/tdxpy_formulas_${TDXPY_TARGET_ARCH}_${CMAKE_BUILD_TYPE}/"
+        VERBATIM
+    )
+endif()
+
+# ============================================================================
+# CPack配置（用于生成安装包）
+# ============================================================================
+
+# CPack配置
+set(CPACK_PACKAGE_NAME "tdxpy_formulas")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_VENDOR "码上工坊")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "通达信Python公式插件")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP")
+    set(CPACK_PACKAGE_EXECUTABLES "tdxpy_formulas.dll" "通达信Python公式插件")
+endif()
+
+include(CPack)
+
+# ============================================================================
+# Visual Studio特定配置
+# ============================================================================
+
+if(MSVC)
+    # 为Visual Studio添加自定义构建后信息
+    add_custom_command(TARGET tdxpy_formulas POST_BUILD
+        COMMAND cmd /c echo ============================================
+        COMMAND cmd /c echo 通达信Python公式插件构建完成！
+        COMMAND cmd /c echo ============================================
+        COMMAND cmd /c echo.
+        COMMAND cmd /c echo 生成文件：
+        COMMAND cmd /c echo   主DLL: $<TARGET_FILE:tdxpy_formulas>
+        COMMAND cmd /c echo   Python DLL: $<TARGET_FILE_DIR:tdxpy_formulas>/${PYTHON_DLL_NAME}
+        COMMAND cmd /c echo   JSON DLL: $<TARGET_FILE_DIR:tdxpy_formulas>/${JSON_DLL_NAME}
+        COMMAND cmd /c echo.
+        COMMAND cmd /c echo 安装方法：
+        COMMAND cmd /c echo   使用命令: cmake --install . --config ${CMAKE_BUILD_TYPE}
+        COMMAND cmd /c echo   安装目录: ${CMAKE_INSTALL_PREFIX}
+        COMMAND cmd /c echo.
+        COMMAND cmd /c echo 部署方法：
+        COMMAND cmd /c echo   使用命令: cmake --build . --target deploy --config ${CMAKE_BUILD_TYPE}
+        COMMAND cmd /c echo   部署目录: ${CMAKE_SOURCE_DIR}/deploy/
+        COMMAND cmd /c echo.
+        COMMAND cmd /c echo ============================================
+        VERBATIM
+    )
+endif()
+
+# ============================================================================
+# 配置摘要
+# ============================================================================
+
+message(STATUS "")
+message(STATUS "==========================================")
+message(STATUS "通达信Python公式插件配置")
+message(STATUS "==========================================")
+message(STATUS "项目版本: ${PROJECT_VERSION}")
+message(STATUS "构建类型: ${CMAKE_BUILD_TYPE}")
+message(STATUS "目标架构: ${TDXPY_TARGET_ARCH}")
+message(STATUS "Python架构: ${TDXPY_TARGET_ARCHITECTURE}")
+message(STATUS "Python版本: 3.14.2 (${TDXPY_TARGET_ARCH}位)")
+message(STATUS "Python路径: ${PYTHON_ROOT}")
+message(STATUS "Python库: ${PYTHON_LIBRARY}")
+message(STATUS "Python DLL: ${PYTHON_DLL_NAME}")
+message(STATUS "JSON架构目录: ${JSON_ARCH_DIR}")
+message(STATUS "JSON库目录: ${JSON_LIB_DIR}")
+message(STATUS "JSON库: ${JSON_LIBRARY}")
+message(STATUS "JSON DLL: ${JSON_DLL_NAME}")
+message(STATUS "输出目录: ${CMAKE_BINARY_DIR}/bin")
+message(STATUS "安装基础目录: ${INSTALL_BASE_DIR}")
+message(STATUS "安装子目录: ${INSTALL_SUBDIR}")
+message(STATUS "部署目录: ${CMAKE_SOURCE_DIR}/deploy")
+message(STATUS "包含目录:")
+foreach(INCLUDE_DIR ${TDXPY_INCLUDE_DIRS})
+    if(EXISTS "${INCLUDE_DIR}")
+        message(STATUS "  - ${INCLUDE_DIR}")
+    endif()
+endforeach()
+if(BUILD_TESTING)
+    if(TEST_SOURCES_COUNT GREATER 0)
+        message(STATUS "测试目标: tdxpy_formulas_tests")
+        message(STATUS "测试源文件目录: ${TEST_SOURCE_DIR}")
+        message(STATUS "测试源文件数量: ${TEST_SOURCES_COUNT}")
+    else()
+        # 更详细的状态信息
+        if(NOT TEST_SOURCE_DIR)
+            message(STATUS "测试: 已启用但测试源目录未设置")
+        elseif(NOT EXISTS "${TEST_SOURCE_DIR}")
+            message(STATUS "测试: 已启用但测试源目录不存在: ${TEST_SOURCE_DIR}")
+        else()
+            message(STATUS "测试: 已启用但未找到测试源文件")
+        endif()
+    endif()
+else()
+    message(STATUS "测试: 已禁用 (启用请设置 BUILD_TESTING=ON)")
+endif()
+
+message(STATUS "==========================================")
+
+message(STATUS "")
+message(STATUS "使用说明:")
+message(STATUS "------------------------------------------------------------------------")
+message(STATUS "步骤1: 配置和构建")
+message(STATUS "  - 32位构建: cmake -B build -A Win32")
+message(STATUS "  - 64位构建: cmake -B build -A x64")
+message(STATUS "  - 启用测试: cmake -B build -DBUILD_TESTING=ON")
+message(STATUS "  - 构建命令: cmake --build build --config ${CMAKE_BUILD_TYPE}")
+if(BUILD_TESTING)
+message(STATUS "  - 运行测试: ctest --test-dir build")
+endif()
+message(STATUS "")
+message(STATUS "步骤2: 安装（需要时执行）")
+message(STATUS "  - 安装命令: cmake --install build --config ${CMAKE_BUILD_TYPE}")
+message(STATUS "  - 安装目录: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "")
+message(STATUS "步骤3: 创建部署包（可选）")
+message(STATUS "  - 部署命令: cmake --build build --target deploy")
+message(STATUS "  - 部署包位置: ${CMAKE_SOURCE_DIR}/deploy/")
+message(STATUS "")
+message(STATUS "重要提示:")
+message(STATUS "  - 32位构建使用项目内的Python (${PYTHON_ROOT_32})")
+message(STATUS "  - 64位构建使用系统Python (默认: ${PYTHON_ROOT_64})")
+message(STATUS "  - 如需修改64位Python路径，请在CMake配置时指定: -DPYTHON_ROOT_64=/your/path")
+message(STATUS "  - 安装目录按架构分开: ${INSTALL_BASE_DIR}/<架构>/<构建类型>")
+message(STATUS "  - 测试功能需要Google Test库，请确保已安装或放置在third_party/googletest目录")
+message(STATUS "")
+message(STATUS "Visual Studio用户:")
+message(STATUS "  - 打开生成的tdxpy_formulas.sln文件")
+message(STATUS "  - 选择配置: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  - 选择平台: ${TDXPY_TARGET_ARCHITECTURE}")
+message(STATUS "  - 构建项目")
+if(BUILD_TESTING)
+message(STATUS "  - 运行测试: 在解决方案资源管理器中选择tdxpy_formulas_tests项目，右键设为启动项")
+endif()
+message(STATUS "  - 安装: 菜单 生成 -> 安装")
+message(STATUS "==========================================")

@@ -1,0 +1,155 @@
+# 构建系统生成文件
+build*/
+buildx86/
+build-x64/
+x64/
+x86/
+Win32/
+Release/
+Debug/
+out/
+bin/
+obj/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.cmake
+*.cmake.in
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+_CPack_Packages/
+*.dir/
+*.tlog/
+*.log
+*.idb
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+
+# IDE 和编辑器文件
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# Python 生成文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Python 虚拟环境
+pythonenv/
+venv/
+ENV/
+env/
+.Python
+python.exe
+
+# 日志文件
+*.log
+logs/
+tdxpy_init.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak
+
+# 打包文件
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tgz
+*.tbz2
+
+# 文档生成
+docs/_build/
+docs/build/
+
+# 测试相关
+tests/output/
+tests/reports/
+tests/temp/
+
+# 个人配置文件
+personal_config.json
+local_config.json
+secrets.json
+*.local
+.env
+.env.local
+.env.*.local
+
+# 安装目录
+dlls/
+
+# 临时数据文件
+*.tmp
+*.temp
+temp/
+tmp/
+
+# 代码分析报告
+*.code-workspace
+*.sublime-workspace
+*.sublime-project
+
+# 二进制文件（除了需要提交的）
+*.dll  # 除了一些必要的系统dll
+*.lib
+*.obj
+*.res
+
+# 预编译头文件
+pch.h.gch
+*.pch
+
+# Visual Studio Intellisense
+*.ncb
+*.aps
+
+# Windows Installer 文件
+*.msi
+*.msm
+*.msp
+
+# 备份文件
+*_backup.*
+backup/

@@ -1,0 +1,60 @@
+﻿#include <windows.h>
+#include <winver.h>
+
+// 版本信息
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     0,1,0,0     // 文件版本 0.1.0.0
+PRODUCTVERSION  0,1,0,0     // 产品版本 0.1.0.0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0           // VS_FF_DEBUG | VS_FF_PRERELEASE
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL     // DLL类型
+FILESUBTYPE     VFT2_UNKNOWN
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        // 简体中文 (0x0804) 和 Unicode (1200)
+        BLOCK "080404B0"
+        BEGIN
+            VALUE "CompanyName",        "码上工坊"
+            VALUE "FileDescription",    "通达信Python公式插件"
+            VALUE "FileVersion",        "0.1.0.0"
+            VALUE "InternalName",       "tdxpy_formulas.dll"
+            VALUE "LegalCopyright",     "版权所有 (c) 2026 码上工坊"
+            VALUE "OriginalFilename",   "tdxpy_formulas.dll"
+            VALUE "ProductName",        "通达信Python公式插件"
+            VALUE "ProductVersion",     "0.1.0.0"
+            VALUE "Comments",           "使用Python编写通达信指标公式的DLL框架"
+        END
+        
+        // 美国英语 (0x0409) 和 Unicode (1200)
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",        "Code Workshop"
+            VALUE "FileDescription",    "TDX Python Formulas Plugin"
+            VALUE "FileVersion",        "0.1.0.0"
+            VALUE "InternalName",       "tdxpy_formulas.dll"
+            VALUE "LegalCopyright",     "Copyright (c) 2026 Code Workshop. All rights reserved."
+            VALUE "OriginalFilename",   "tdxpy_formulas.dll"
+            VALUE "ProductName",        "TDX Python Formulas"
+            VALUE "ProductVersion",     "0.1.0.0"
+            VALUE "Comments",           "DLL framework for writing TDX indicator formulas in Python"
+        END
+    END
+    
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0804, 1200  // 简体中文
+        VALUE "Translation", 0x0409, 1200  // 美国英语
+    END
+END
+
+// 图标资源（可选）
+// ICON_DIRECTORY        ICON DISCARDABLE
+// BEGIN
+//     ICON_ID_ICON1 ICON "tdxpy_formulas.ico"
+// END
+
+// 清单文件（可选）
+// 1 RT_MANIFEST "tdxpy_formulas.manifest"

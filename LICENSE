@@ -1,0 +1,71 @@
+MIT License
+
+Copyright (c) 2026 码上工坊 and tdxpy_formulas contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+This project includes third-party software components that are licensed under
+their respective licenses.
+
+1. Python 3.14.2
+   - Copyright (c) 2001-2026 Python Software Foundation
+   - License: Python Software Foundation License (PSFL)
+   - Source: https://www.python.org/
+   - The Python license can be found in the third_party/Python3142-32/LICENSE.txt file
+
+2. JSON for Modern C++ (jsoncpp)
+   - Copyright (c) 2007-2020 Baptiste Lepilleur and JSON for Modern C++ contributors
+   - License: MIT License
+   - Source: https://github.com/open-source-parsers/jsoncpp
+   - The JSON for Modern C++ license can be found in the third_party/jsoncpp/LICENSE file
+
+3. Microsoft Visual C++ Runtime Libraries
+   - Copyright (c) Microsoft Corporation
+   - License: Microsoft Software License Terms
+   - These components are redistributed under the terms of the Microsoft Visual Studio license
+
+================================================================================
+
+DISCLAIMERS
+
+1. This project is an independent third-party plugin framework and is not affiliated
+   with or endorsed by Tongdaxin (通达信) software or its developers.
+   
+2. Tongdaxin is a trademark of Hangzhou Hexin Software Technology Co., Ltd.
+
+3. This software is provided for educational and research purposes only. No investment
+   advice is provided. Users should exercise caution and perform their own due diligence
+   when using technical analysis indicators for investment decisions.
+
+4. The authors and contributors of this project are not responsible for any financial
+   losses or damages resulting from the use of this software.
+
+================================================================================
+
+CONTACT INFORMATION
+
+- Project Home: https://gitee.com/ICodeWR/tdxpy_formulas
+- Issues: https://gitee.com/ICodeWR/tdxpy_formulas/issues
+- Email: 3892493481@qq.com
+
+Last Updated: 2026-01-10
