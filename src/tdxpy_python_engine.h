@@ -42,7 +42,7 @@ extern "C"
     bool tdxpyIsPythonInitialized(void);
 
     /**
-     * @brief 获取Python版本字符串(代码需要修改)
+     * @brief 获取Python版本字符串
      * @return Python版本字符串
      */
     const char *tdxpyGetPythonVersion(void);
@@ -53,10 +53,16 @@ extern "C"
     int tdxpyGetLastFunctionId(void);
 
     /**
-     * @brief 检查是否是Python 3.14或更高版本（代码需要修改）
-     * @return 是3.14+返回true
+     * @brief 重新加载配置，代码需要修改（函数作用待斟酌）
+     * @return 成功返回true
      */
-    bool tdxpyIsPython314OrHigher(void);
+    bool tdxpyReloadConfig(void);
+
+        /**
+         * @brief 检查是否是Python 3.14或更高版本
+         * @return 是3.14+返回true
+         */
+        bool tdxpyIsPython314OrHigher(void);
 
     /**
      * @brief 释放Python引擎资源

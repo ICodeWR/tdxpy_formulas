@@ -27,19 +27,6 @@
 #include "tdxpy_env_var.h"
 
 // ==================================================================
-// 版本兼容性宏
-// ==================================================================
-
-// 检测Python版本
-#if PY_VERSION_HEX >= 0x030E0000 // 3.14.0
-#define TDXPY_PYTHON_314_PLUS 1
-#elif PY_VERSION_HEX >= 0x03090000 // 3.9.0
-#define TDXPY_PYTHON_39_PLUS 1
-#elif PY_VERSION_HEX >= 0x03070000 // 3.7.0
-#define TDXPY_PYTHON_37_PLUS 1
-#endif
-
-// ==================================================================
 // 线程安全辅助类
 // ==================================================================
 
@@ -96,7 +83,7 @@ static std::mutex g_initMutex;                       // Python初始化互斥锁
 /**
  * @brief 安全的Python错误处理
  */
-static void SafePyErrPrint()
+static void SafePyErrPrint(void)
 {
     if (PyErr_Occurred())
     {
@@ -109,11 +96,36 @@ static void SafePyErrPrint()
 /**
  * @brief 获取Python版本字符串
  */
-static std::string GetPythonVersionString()
+static std::string GetPythonVersionString(void)
 {
-    return std::to_string(PY_MAJOR_VERSION) + "." +
-           std::to_string(PY_MINOR_VERSION) + "." +
-           std::to_string(PY_MICRO_VERSION);
+    if (tdxpyIsPythonInitialized())
+    {
+        PyGILLocker gil;
+#if 0
+        PyObject *pVersion = PyObject_GetAttrString(PyImport_ImportModule("sys"), "version");
+        if (pVersion && PyUnicode_Check(pVersion))
+        {
+            std::string versionStr = PyUnicode_AsUTF8(pVersion);
+            Py_XDECREF(pVersion);
+            return versionStr;
+        }
+        Py_XDECREF(pVersion);
+#endif
+        // 使用Py_GetVersion获取版本信息，确保初始化后调用
+        const char *versionCStr = Py_GetVersion();
+        if (versionCStr)
+        {
+            return std::string(versionCStr);
+        }
+        return "Unknown Version";   
+    }
+    else
+    {
+        // 未初始化时使用编译时版本
+        return std::to_string(PY_MAJOR_VERSION) + "." +
+               std::to_string(PY_MINOR_VERSION) + "." +
+               std::to_string(PY_MICRO_VERSION);    
+    }
 }
 
 /**
@@ -168,7 +180,7 @@ static bool setupVenvEnvironment(std::string &refVenvPath)
  * @brief 初始化Python引擎
  * @return 成功返回0，失败返回1
  */
-int tdxpyPythonInitialize()
+int tdxpyPythonInitialize(void)
 {
     // 检查是否已初始化，第一次检查：快速路径（无锁）
     if (g_pythonInitialized.load(std::memory_order_acquire))
@@ -247,9 +259,6 @@ int tdxpyPythonInitialize()
         TDXPY_LOG_DEBUG(u8"虚拟环境路径: " + venvPath);
     }
 
-    // 显示Python版本信息
-    std::string pyVersion = GetPythonVersionString();
-    TDXPY_LOG_INFO(u8"Python版本: " + pyVersion);
     TDXPY_LOG_DEBUG(u8"开始初始化Python解释器");
 
     // 初始化Python解释器配置
@@ -308,7 +317,9 @@ int tdxpyPythonInitialize()
     // 5. Python 3.7+ 自动初始化线程支持，无需额外操作
 
     TDXPY_LOG_INFO(u8"Python解释器初始化成功!");
-
+    // 显示Python版本信息
+    std::string pyVersion = GetPythonVersionString();
+    TDXPY_LOG_INFO(u8"Python版本: " + pyVersion);
     // 6. 设置初始化标志
     g_pythonInitialized.store(true, std::memory_order_release);
 
@@ -599,7 +610,7 @@ cleanup:
  * @brief 获取最后使用的函数ID
  * @return 最后使用的函数ID
  */
-int tdxpyGetLastFunctionId()
+int tdxpyGetLastFunctionId(void)
 {
     return g_tdxpyLastFunctionId.load(std::memory_order_acquire);
 }
@@ -608,40 +619,41 @@ int tdxpyGetLastFunctionId()
  * @brief 检查Python是否已初始化
  * @return 已初始化返回true
  */
-bool tdxpyIsPythonInitialized()
+bool tdxpyIsPythonInitialized(void)
 {
     return g_pythonInitialized.load(std::memory_order_acquire);
 }
 
 /**
- * @brief 重新加载配置，代码需要修改
+ * @brief 重新加载配置，代码需要修改（函数作用待斟酌）
  * @return 成功返回true
  */
-bool tdxpyReloadConfig()
+bool tdxpyReloadConfig(void)
 {
     std::unique_lock<std::shared_mutex> configLock(g_configMutex);
-    return g_tdxpyConfig.load();
+    return g_tdxpyConfig.reload();
 }
 
 /**
  * @brief 获取Python版本信息
  * @return Python版本字符串
  */
-const char *tdxpyGetPythonVersion()
+const char *tdxpyGetPythonVersion(void)
 {
     static std::string version = GetPythonVersionString();
     return version.c_str();
 }
 
 /**
- * @brief 检查是否是Python 3.14或更高版本(代码需要修改)
+ * @brief 检查是否是Python 3.14或更高版本
  * @return 是3.14+返回true
  */
-bool tdxpyIsPython314OrHigher()
+bool tdxpyIsPython314OrHigher(void)
 {
-#if TDXPY_PYTHON_314_PLUS
-    return true;
-#else
-    return false;
-#endif
+    int major = 0, minor = 0, micro = 0;
+    if (sscanf_s(tdxpyGetPythonVersion(), "%d.%d.%d", &major, &minor, &micro) != 3)
+    {
+        return false;
+    }
+    return (major > 3 || (major == 3 && minor >= 14));
 }

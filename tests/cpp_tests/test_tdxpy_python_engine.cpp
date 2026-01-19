@@ -810,12 +810,6 @@ TEST_F(TdxpyPythonEngineTest, FunctionId_Zero)
     EXPECT_NE(pluginResult, -1); // 不应该崩溃
 }
 
-int tdxpyReloadConfig()
-{
-    return 1;
-}
-
-
 // 测试18: 重新加载配置
 TEST_F(TdxpyPythonEngineTest, ReloadConfig)
 {
