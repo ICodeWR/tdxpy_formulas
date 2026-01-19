@@ -7,9 +7,9 @@
     "license": "MIT"
   },
   "python_config": {
-    "python_home": "C:/new_tdx/T0002/dlls/third_party/Python3142-32/",
-    "python_venv_home": "C:/new_tdx/T0002/dlls/pythonenv/",
+     "python_home": "C:/new_tdx/T0002/dlls/third_party/Python3142-32/",
     "python_executable": "C:/new_tdx/T0002/dlls/third_party/Python3142-32/python.exe",
+    "python_venv_home": "C:/new_tdx/T0002/dlls/pythonenv/",
     "python_formulas_home": "C:/new_tdx/T0002/dlls/pythonenv/tdxpy_formulas/",
     "search_paths": [
       "C:/new_tdx/T0002/dlls/third_party/Python3142-32",
@@ -30,7 +30,7 @@
   "formula_mappings": [
     {
       "name": "TDXPY_MA",
-      "description": "移动平均线",
+      "description": "使用Python移动平均线(MA)计算",
       "path": "",
       "module_name": "tdxpy_ma",
       "function": "tdxpy_ma",

@@ -66,13 +66,13 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Python 虚拟环境
-pythonenv/
-venv/
-ENV/
-env/
-.Python
-python.exe
+# # Python 虚拟环境
+# pythonenv/
+# venv/
+# ENV/
+# env/
+# .Python
+# python.exe
 
 # 日志文件
 *.log
