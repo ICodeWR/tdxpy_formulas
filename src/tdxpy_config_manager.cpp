@@ -43,7 +43,7 @@ namespace tdxpy
             else
             {
                 // 2. 尝试从环境变量获取
-                std::string envPath = tdxpy::utils::EnvVarManager::get("TDXPY_CONFIG_FILE").value_or("TDXPY_DEFAULT_CONFIG_FILE");
+                std::string envPath = tdxpy::utils::EnvVarManager::get("TDXPY_CONFIG_FILE").value_or(TDXPY_DEFAULT_CONFIG_FILE);
                 if (!envPath.empty())
                 {
                     m_configFilePath = envPath;
@@ -75,10 +75,29 @@ namespace tdxpy
 
             TDXPY_LOG_DEBUG(u8"配置文件路径: " + m_configFilePath);
 
+            if (m_configFilePath.empty())
+            {
+                TDXPY_LOG_WARNING(u8"警告: 配置文件路径为空，使用环境变量或者默认路径");
+                // 2. 尝试从环境变量获取
+                std::string envPath = tdxpy::utils::EnvVarManager::get("TDXPY_CONFIG_FILE").value_or(TDXPY_DEFAULT_CONFIG_FILE);
+                if (!envPath.empty())
+                {
+                    m_configFilePath = envPath;
+                    TDXPY_LOG_DEBUG(u8"使用环境变量配置文件: " + envPath);
+                }
+                else
+                {
+                    // 3. 使用默认配置
+                    m_configFilePath = TDXPY_DEFAULT_CONFIG_FILE;
+                    TDXPY_LOG_DEBUG(u8"使用默认配置文件: " + m_configFilePath);
+                }
+            }
+
             // 检查文件是否存在
             if (!std::filesystem::exists(m_configFilePath))
             {
                 TDXPY_LOG_ERROR(u8"错误: 配置文件不存在 - " + m_configFilePath);
+                m_isLoaded = false;
                 return false;
             }
 
@@ -86,6 +105,7 @@ namespace tdxpy
             if (!configFileStream.is_open())
             {
                 TDXPY_LOG_ERROR(u8"错误: 无法打开配置文件 - " + m_configFilePath);
+                m_isLoaded = false;
                 return false;
             }
 
@@ -98,6 +118,7 @@ namespace tdxpy
             if (!Json::parseFromStream(jsonReaderBuilder, configFileStream, &m_root, &errs))
             {
                 TDXPY_LOG_ERROR(u8"错误: JSON解析失败 - " + errs);
+                m_isLoaded = false;
                 return false;
             }
 
@@ -107,6 +128,7 @@ namespace tdxpy
             if (!validateJsonStructure())
             {
                 TDXPY_LOG_ERROR(u8"错误: 配置文件结构无效");
+                m_isLoaded = false;
                 return false;
             }
 

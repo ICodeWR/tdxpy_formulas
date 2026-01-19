@@ -14,8 +14,7 @@
  * </table>
  */
 
-
- // 如果需要禁用特定安全警告
+// 如果需要禁用特定安全警告
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <iomanip>
@@ -38,7 +37,7 @@ namespace tdxpy
         cleanup();
     }
 
-    bool Logger::initialize(const std::string& logFilePath, LogLevel minLevel)
+    bool Logger::initialize(const std::string &logFilePath, LogLevel minLevel)
     {
         std::lock_guard<std::mutex> lock(m_logMutex);
 
@@ -73,8 +72,8 @@ namespace tdxpy
         m_minLevel = level;
     }
 
-    void Logger::log(LogLevel level, const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::log(LogLevel level, const std::string &function, const std::string &file,
+                     int line, const std::string &message)
     {
         if (level < m_minLevel)
             return;
@@ -86,8 +85,8 @@ namespace tdxpy
 
         // 构建日志行，包含文件行号
         std::string logLine = getCurrentTime() + " [" + levelToString(level) + "] " +
-            fileName + ":" + std::to_string(line) + " " +
-            function + "() - " + message;
+                              fileName + ":" + std::to_string(line) + " " +
+                              function + "() - " + message;
 
         // 输出到控制台
         std::cout << logLine << std::endl;
@@ -100,32 +99,32 @@ namespace tdxpy
         }
     }
 
-    void Logger::trace(const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::trace(const std::string &function, const std::string &file,
+                       int line, const std::string &message)
     {
         log(LogTrace, function, file, line, message);
     }
 
-    void Logger::debug(const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::debug(const std::string &function, const std::string &file,
+                       int line, const std::string &message)
     {
         log(LogDebug, function, file, line, message);
     }
 
-    void Logger::info(const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::info(const std::string &function, const std::string &file,
+                      int line, const std::string &message)
     {
         log(LogInfo, function, file, line, message);
     }
 
-    void Logger::warning(const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::warning(const std::string &function, const std::string &file,
+                         int line, const std::string &message)
     {
         log(LogWarning, function, file, line, message);
     }
 
-    void Logger::error(const std::string& function, const std::string& file,
-        int line, const std::string& message)
+    void Logger::error(const std::string &function, const std::string &file,
+                       int line, const std::string &message)
     {
         log(LogError, function, file, line, message);
     }
@@ -143,7 +142,7 @@ namespace tdxpy
         m_isInitialized = false;
     }
 
-    std::string Logger::extractFileName(const std::string& fullPath)
+    std::string Logger::extractFileName(const std::string &fullPath)
     {
         // 找到最后一个路径分隔符
 #if defined(_WIN32) || defined(_WIN64)
@@ -167,8 +166,8 @@ namespace tdxpy
 
         // 获取毫秒
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()) %
-            1000;
+                      now.time_since_epoch()) %
+                  1000;
 
         // 安全版本的 localtime（使用本地时间）
         std::tm localTm;
@@ -178,7 +177,7 @@ namespace tdxpy
         localtime_s(&localTm, &nowTime);
 #else
         // 其他平台的兼容版本
-        std::tm* tmp = std::localtime(&nowTime);
+        std::tm *tmp = std::localtime(&nowTime);
         if (tmp)
         {
             localTm = *tmp;
@@ -216,12 +215,12 @@ namespace tdxpy
             return "UNKNOWN";
         }
     }
-    LogLevel Logger::getLevelFromString(const std::string& levelStr)
+    LogLevel Logger::getLevelFromString(const std::string &levelStr)
     {
         std::string levelUpper = levelStr;
         std::transform(levelUpper.begin(), levelUpper.end(), levelUpper.begin(),
-            [](unsigned char c)
-            { return std::toupper(c); });
+                       [](unsigned char c)
+                       { return std::toupper(c); });
 
         if (levelUpper == "TRACE")
             return LogTrace;

@@ -19,21 +19,22 @@
 
 #pragma pack(push, 1)
 
- /// 插件函数类型定义 (数据个数, 输出, 输入a, 输入b, 输入c)
-typedef void (*TdxPluginFunction)(int dataLength, float* output,
-    float* inputA, float* inputB, float* inputC);
+/// 插件函数类型定义 (数据个数, 输出, 输入a, 输入b, 输入c)
+typedef void (*TdxPluginFunction)(int dataLength, float *output,
+                                  float *inputA, float *inputB, float *inputC);
 
 /// 插件函数信息结构体
 typedef struct TdxPluginFunctionInfo
 {
-    unsigned short      functionId;     ///< 功能ID号，即调用第几号回调函数
-    TdxPluginFunction   function;   ///< 回调函数指针
+    unsigned short functionId;  ///< 功能ID号，即调用第几号回调函数
+    TdxPluginFunction function; ///< 回调函数指针
 } TdxPluginFunctionInfo;
 
 #pragma pack(pop)
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif // __cplusplus
 
     /**
@@ -43,7 +44,7 @@ extern "C" {
      * @retval TRUE 成功注册插件函数表
      * @retval FALSE 插件函数表已存在或注册失败
      */
-    extern "C" __declspec(dllexport) BOOL RegisterTdxFunc(TdxPluginFunctionInfo** pluginFuncTable);
+    extern "C" __declspec(dllexport) BOOL RegisterTdxFunc(TdxPluginFunctionInfo **pluginFuncTable);
 
 #ifdef __cplusplus
 }

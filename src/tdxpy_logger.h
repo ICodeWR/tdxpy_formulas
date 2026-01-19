@@ -23,26 +23,30 @@
 #include <mutex>
 #include <ctime>
 
-namespace tdxpy {
+namespace tdxpy
+{
 
     /**
      * @brief 日志级别枚举
      */
-    enum LogLevel {
-        LogTrace = 1,      ///< 详细级别
-        LogDebug = 2,      ///< 调试级别
-        LogInfo = 3,       ///< 信息级别
-        LogWarning = 4,    ///< 警告级别
-        LogError = 5,      ///< 错误级别
-        LogOff = 6         ///< 关闭日志
+    enum LogLevel
+    {
+        LogTrace = 1,   ///< 详细级别
+        LogDebug = 2,   ///< 调试级别
+        LogInfo = 3,    ///< 信息级别
+        LogWarning = 4, ///< 警告级别
+        LogError = 5,   ///< 错误级别
+        LogOff = 6      ///< 关闭日志
     };
 
-    class Logger {
+    class Logger
+    {
     public:
         /**
          * @brief 获取单例实例
          */
-        static Logger& getInstance() {
+        static Logger &getInstance()
+        {
             static Logger instance;
             return instance;
         }
@@ -53,7 +57,7 @@ namespace tdxpy {
          * @param minLevel 最小日志级别
          * @return 初始化成功返回true，失败返回false
          */
-        bool initialize(const std::string& logFilePath, LogLevel minLevel = LogInfo);
+        bool initialize(const std::string &logFilePath, LogLevel minLevel = LogInfo);
 
         /**
          * @brief 设置最小日志级别
@@ -69,61 +73,60 @@ namespace tdxpy {
          * @param line 行号
          * @param message 日志消息
          */
-        void log(LogLevel level, const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void log(LogLevel level, const std::string &function, const std::string &file,
+                 int line, const std::string &message);
 
-            
         /**
          * @brief 详细调试级别日志（目前和debug没有严格区别，属于预留接口）
          */
-        void trace(const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void trace(const std::string &function, const std::string &file,
+                   int line, const std::string &message);
 
         /**
          * @brief 调试级别日志
          */
-        void debug(const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void debug(const std::string &function, const std::string &file,
+                   int line, const std::string &message);
 
         /**
          * @brief 信息级别日志
          */
-        void info(const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void info(const std::string &function, const std::string &file,
+                  int line, const std::string &message);
 
         /**
          * @brief 警告级别日志
          */
-        void warning(const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void warning(const std::string &function, const std::string &file,
+                     int line, const std::string &message);
 
         /**
          * @brief 错误级别日志
          */
-        void error(const std::string& function, const std::string& file,
-            int line, const std::string& message);
+        void error(const std::string &function, const std::string &file,
+                   int line, const std::string &message);
 
         /**
          * @brief 清理资源
          */
         void cleanup();
 
-        LogLevel getLevelFromString(const std::string& levelStr);
+        LogLevel getLevelFromString(const std::string &levelStr);
 
     private:
         Logger();
         ~Logger();
-        Logger(const Logger&) = delete;
-        Logger& operator=(const Logger&) = delete;
+        Logger(const Logger &) = delete;
+        Logger &operator=(const Logger &) = delete;
 
         std::string getCurrentTime();
         std::string levelToString(LogLevel level);
-        std::string extractFileName(const std::string& fullPath);
+        std::string extractFileName(const std::string &fullPath);
 
-        std::ofstream m_logFile;      ///< 日志文件流
-        std::mutex m_logMutex;        ///< 日志互斥锁
-        LogLevel m_minLevel;          ///< 最小日志级别
-        bool m_isInitialized;         ///< 是否已初始化
+        std::ofstream m_logFile; ///< 日志文件流
+        std::mutex m_logMutex;   ///< 日志互斥锁
+        LogLevel m_minLevel;     ///< 最小日志级别
+        bool m_isInitialized;    ///< 是否已初始化
     };
 
     // 宏定义，简化调用

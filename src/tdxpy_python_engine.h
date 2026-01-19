@@ -36,6 +36,29 @@ extern "C"
     int tdxpyPythonInitialize(void);
 
     /**
+     * @brief 检查Python引擎是否已初始化
+     * @return 已初始化返回true，否则返回false
+     */
+    bool tdxpyIsPythonInitialized(void);
+
+    /**
+     * @brief 获取Python版本字符串(代码需要修改)
+     * @return Python版本字符串
+     */
+    const char *tdxpyGetPythonVersion(void);
+
+    /**
+     * @brief 获取最后调用的函数ID
+     */
+    int tdxpyGetLastFunctionId(void);
+
+    /**
+     * @brief 检查是否是Python 3.14或更高版本（代码需要修改）
+     * @return 是3.14+返回true
+     */
+    bool tdxpyIsPython314OrHigher(void);
+
+    /**
      * @brief 释放Python引擎资源
      * @return 始终返回1
      */

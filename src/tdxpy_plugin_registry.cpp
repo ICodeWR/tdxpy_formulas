@@ -39,7 +39,7 @@ namespace
         if (!tdxpyRunPythonPlugin(functionId, dataLength, output, inputA, inputB, inputC))
         {
             // 第 0 号函数特殊处理：重新加载 Python 模块
-            if (functionId)
+            if (functionId && output && dataLength > 0)
             {
                 for (int i = 0; i < dataLength; i++)
                 {
@@ -278,7 +278,7 @@ BOOL RegisterTdxFunc(TdxPluginFunctionInfo **pluginFuncTable)
 {
     TDXPY_LOG_DEBUG(u8"注册通达信插件函数: " + std::to_string(sizeof(g_pluginFunctionTable) / sizeof(TdxPluginFunctionInfo) - 1) + u8" 个函数");
 
-    if (*pluginFuncTable == nullptr)
+    if (pluginFuncTable && *pluginFuncTable == nullptr)
     {
         (*pluginFuncTable) = g_pluginFunctionTable;
         return TRUE;

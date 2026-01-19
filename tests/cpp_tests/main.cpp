@@ -22,33 +22,34 @@
 #include <windows.h>
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     std::cout << u8"=== 测试程序开始 ===" << std::endl;
-    
+
 #ifdef _WIN32
     // 确保控制台使用UTF-8
     SetConsoleOutputCP(CP_UTF8);
     std::cout << u8"控制台编码已设置为UTF-8" << std::endl;
 #endif
-    
+
     std::cout << u8"正在初始化Google Test..." << std::endl;
-    
+
     // 初始化Google Test
     ::testing::InitGoogleTest(&argc, argv);
-    
+
     std::cout << u8"Google Test初始化完成" << std::endl;
     std::cout << u8"开始运行测试..." << std::endl;
     std::cout << u8"========================" << std::endl;
-    
+
     int result = RUN_ALL_TESTS();
-    
+
     std::cout << u8"========================" << std::endl;
     std::cout << u8"测试运行完成，返回值: " << result << std::endl;
-    
+
     // Windows下暂停，以便查看输出
 #ifdef _WIN32
     system("pause");
 #endif
-    
+
     return result;
 }
