@@ -66,13 +66,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# # Python 虚拟环境
-# pythonenv/
-# venv/
-# ENV/
-# env/
-# .Python
-# python.exe
 
 # 日志文件
 *.log
@@ -153,3 +146,9 @@ pch.h.gch
 # 备份文件
 *_backup.*
 backup/
+
+# 保留特定目录
+!Libs/
+!Libs/**
+!pythonenv/
+!pythonenv/**
