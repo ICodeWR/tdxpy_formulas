@@ -36,18 +36,18 @@
 4. **解决标记为 "good first issue" 的问题**
 
 ### 第一步：Fork 项目
-1. 访问 [项目主页](https://gitee.com/icodewr/tdxpy_formulas)
+1. 访问 [项目主页](https://github.com/ICodeWR/tdxpy_formulas)
 2. 点击右上角的 "Fork" 按钮
 3. 克隆你的 Fork 到本地：
 ```bash
-git clone git@gitee.com:icodewr/tdxpy_formulas.git
+git clone git@github.com:ICodeWR/tdxpy_formulas.git
 cd tdxpy_formulas
 ```
 
 ### 第二步：设置上游仓库并创建分支
 ```bash
 # 添加上游仓库
-git remote add upstream git@gitee.com:icodewr/tdxpy_formulas.git
+git remote add upstream git@github.com:ICodeWR/tdxpy_formulas.git
 
 # 同步最新代码
 git fetch upstream

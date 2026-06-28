@@ -91,7 +91,7 @@ tdxpy_formulas/
 
 ```bash
 # 克隆项目仓库
-git clone https://gitee.com/icodewr/tdxpy_formulas
+git clone https://github.com/ICodeWR/tdxpy_formulas
 cd tdxpy_formulas
 
 # 如果使用子模块（可选）
@@ -562,7 +562,7 @@ tail -100 "C:\new_tdx\T0002\dlls\logs\tdxpy_formula.log"
 
 ## 📞 支持与反馈
 
-- **问题报告**: [GitHub Issues](https://gitee.com/icodewr/tdxpy_formulas/issues)
+- **问题报告**: [GitHub Issues](https://github.com/ICodeWR/tdxpy_formulas/issues)
 - **功能请求**: 通过Issue提交
 - **讨论交流**: 3892493481@qq.com
 - **公众号**：可关注公众号交流
